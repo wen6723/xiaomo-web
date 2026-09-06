@@ -446,6 +446,22 @@ with st.sidebar:
             save_current_user_memory()
             st.success("已清空")
     st.divider()
+    if st.checkbox("我确认要永久删除当前账号及其所有记忆"):
+        if st.button("删除当前账号", use_container_width=True):
+            username = st.session_state.auth_user
+            doc = load_storage_doc()
+            if username in doc["users"]:
+                del doc["users"][username]
+                if save_storage_doc(doc):
+                    st.success("账号已删除")
+                    for key in ("auth_user", "api_key", "loaded_user", "profile", "messages"):
+                        if key in st.session_state:
+                            del st.session_state[key]
+                    st.rerun()
+                else:
+                    st.error("账号删除失败，云端保存出错")
+            else:
+                st.error("账号不存在或已经删除")
     if st.button("退出登录", use_container_width=True):
         for key in ("auth_user", "api_key", "loaded_user", "profile", "messages"):
             if key in st.session_state:
